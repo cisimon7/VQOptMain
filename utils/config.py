@@ -3,7 +3,7 @@ from datetime import datetime
 
 config = dict(
     lanes_count=4,
-    vehicles_count=50,
+    vehicles_count=30,
     vehicles_density=3.0,
     controlled_vehicles=1,
     initial_lane_id=None,

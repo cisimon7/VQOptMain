@@ -31,9 +31,9 @@ class TriDataset(Dataset):
 def main(cfg: DictConfig) -> None:
     seed_mch()
     
-    primals_1 = th.load("./datasets/dist_prims1_04_00.pt")
-    observations = th.load("./datasets/dist_obs_04_00.pt").repeat_interleave(primals_1.size(1), dim=0)
-    targets = th.load("./datasets/dist_targets_04_00.pt").repeat_interleave(primals_1.size(1), dim=0)
+    primals_1 = th.load("./datasets/dist_data/dist_prims1_04_00.pt")
+    observations = th.load("./datasets/dist_data/dist_obs_04_00.pt").repeat_interleave(primals_1.size(1), dim=0)
+    targets = th.load("./datasets/dist_data/dist_targets_04_00.pt").repeat_interleave(primals_1.size(1), dim=0)
     primals_1 = primals_1.flatten(start_dim=0, end_dim=1)
     
     train_dataset = TriDataset(observations, targets, primals_1)

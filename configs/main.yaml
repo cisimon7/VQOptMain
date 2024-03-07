@@ -23,11 +23,11 @@ device: "cuda"
 #pix_name: "train_03/pixnet_150.pth"
 #obs_name: "train_03/obsnet_150.pth"
 
-main_name: "train_04_00/model_150.pth"
+main_name: "train_04_01/model_100.pth"
 
-vqvae_name: "train_05/model_250.pth"
-pix_name: "train_05/pixnet_200.pth"
-obs_name: "train_05/obsnet_200.pth"
+vqvae_name: "train_04/model_250.pth"
+pix_name: "train_04/pixnet_200.pth"
+obs_name: "train_04/obsnet_200.pth"
 
 batch_size: 1000
 
@@ -37,7 +37,7 @@ defaults:
     - pixel: cnn
 
 optimizer:
-    maxiter: 50
+    maxiter: 10
     v_des: 20
 
 env:
@@ -45,7 +45,7 @@ env:
     num_eps: 50
     record: False
     name: ""
-    render: False
+    render: True
     plot: False
 
 hydra:

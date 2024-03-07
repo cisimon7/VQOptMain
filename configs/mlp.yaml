@@ -1,11 +1,11 @@
 device: "cuda"
 train_log_dir: "./logs"
 
-vqvae_name: "train_04/model_100.pth"
-pix_name: "train_04/pixnet_150.pth"
-obs_name: "train_04/obsnet_150.pth"
+vqvae_name: "train_04/model_250.pth"
+pix_name: "train_04/pixnet_200.pth"
+obs_name: "train_04/obsnet_200.pth"
 
-train_name: "train_03_01"
+train_name: "train_04_02"
 
 num_epoch: 501
 batch_size: 5000

@@ -461,7 +461,8 @@ class DOptimizer(th.nn.Module):
         
         initializer_output = self.initializer_model(primal_sol_level_1, observations)
         primal_sol_level_bar, lamda_x, lamda_y = initializer_output.split([2*self.nvar, self.nvar, self.nvar], -1)
-        
+        primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
+
         (alpha_obs, d_obs, alpha_a, d_a,
             lamda_x, lamda_y, alpha_v, d_v,
             s_lane, res_norm_batch
@@ -505,6 +506,7 @@ class DOptimizer(th.nn.Module):
 
         initializer_output = self.initializer_model(primal_sol_level_1, observations)
         primal_sol_level_bar, lamda_x, lamda_y = initializer_output.split([2*self.nvar, self.nvar, self.nvar], -1)
+        primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
 
         (alpha_obs, d_obs, alpha_a, d_a,
                 lamda_x, lamda_y, alpha_v, d_v,

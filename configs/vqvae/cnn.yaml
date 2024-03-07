@@ -15,7 +15,7 @@ encoder:
 
 codebook:
     latent_dim: 5
-    num_embeddings: 512  # 16, 512
+    num_embeddings: 16  # 16, 512
     num_features: 10
 
 decoder:
@@ -27,5 +27,5 @@ initializer:
     shape: [256, 1024, 1024, 1024]
 
 optimizer:
-    maxiter: 25
+    maxiter: 10
     v_des: 20

@@ -80,9 +80,9 @@ def main(cfg: DictConfig) -> None:
         primals_1 = th.stack(primals_1)
         targets = th.stack(targets)
         
-        th.save(observations, './datasets/dist_obs_05_00.pt') 
-        th.save(primals_1, './datasets/dist_prims1_05_00.pt')
-        th.save(targets, './datasets/dist_targets_05_00.pt')
+        th.save(observations, './datasets/dist_data/dist_obs_05_00.pt') 
+        th.save(primals_1, './datasets/dist_data/dist_prims1_05_00.pt')
+        th.save(targets, './datasets/dist_data/dist_targets_05_00.pt')
         
         print("size of observations: ", observations.size())
         print("size of primals_1: ", primals_1.size())

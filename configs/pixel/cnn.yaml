@@ -3,7 +3,7 @@ vqvae_model: "train_05/model_250.pth"
 num_epoch: 501
 batch_size: 500
 learning_rate: 1e-3
-train_name: "train_05"
+train_name: "train_04"
 cond_dim: 55
 n_channels: 64
 n_layers: 5

@@ -127,20 +127,11 @@ class VQVAEModule(th.nn.Module):
         )
         pro_pen = th.nn.functional.mse_loss(primal_sol_level_2, primal_sol_level_1)
 
-        # lane_width = 3.5
-        # l_bound = observations[..., 1]
-        # cen_diff = th.tensor([0.5*lane_width, 1.5*lane_width, 2.5*lane_width, 3.5*lane_width], device=self.device)
-        # centers = l_bound[..., None] + cen_diff
-        # 
-        # cen_offset = y[..., None] - centers[:, None, :]
-        # cen_closest = cen_offset.abs().prod(dim=-1).sum(dim=-1)
-
-        k = dict(res=1e0, vel=1e-1, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e0, cen=1e-9)
-        # k = dict(res=1e0, vel=1e0, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e0, cen=1e-9)
-        # k = dict(res=1e0, vel=1e-1, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e-1, cen=1e-9)
+        k = dict(res=1e0, vel=1e-3, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e-3, cen=1e-9)
+        # k = dict(res=1e0, vel=1e-1, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e0, cen=1e-9)
         aug_loss = (
             + k["res"] * accumulated_res
-            # + k["vel"] * vel_pen
+            + k["vel"] * vel_pen
             + k["pro"] * pro_pen
             # + k["hed"] * heading_penalty
             # + k["cen"] * cen_closest
