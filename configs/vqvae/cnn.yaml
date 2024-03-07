@@ -1,0 +1,31 @@
+type: "cnn"
+num_epoch: 501
+batch_size: 5000
+learning_rate: 1e-3
+train_name: "train_05"
+warm_star: "" 
+
+encoder:
+    output_dim: 8
+    hid_channels: 96
+    out_channels: 96
+    kernel_size: 11
+    padding: 5
+    num_layers: 10
+
+codebook:
+    latent_dim: 5
+    num_embeddings: 512  # 16, 512
+    num_features: 10
+
+decoder:
+    shape: [256, 1024, 1024, 1024]
+    
+initializer:
+    input_dim: 77
+    output_dim: 44
+    shape: [256, 1024, 1024, 1024]
+
+optimizer:
+    maxiter: 25
+    v_des: 20

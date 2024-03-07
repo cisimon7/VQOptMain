@@ -1,0 +1,53 @@
+device: "cuda"
+
+#main_name: "train_00_20/model_150.pth"
+#main_name: "train_00_21/model_100.pth"
+#main_name: "train_00_22/model_100.pth"
+#main_name: "train_00_23/model_100.pth"
+#main_name: "train_00_24/model_100.pth"
+#main_name: "train_00_26/model_100.pth"
+
+#vqvae_name: "train_00/model_100.pth"
+#pix_name: "train_00/pixnet_150.pth"
+#obs_name: "train_00/obsnet_150.pth"
+
+#main_name: "train_02_00/model_150.pth"
+#
+#vqvae_name: "train_02/model_150.pth"
+#pix_name: "train_02/pixnet_250.pth"
+#obs_name: "train_02/obsnet_250.pth"
+
+#main_name: "train_03_01/model_100.pth"
+
+#vqvae_name: "train_03/model_100.pth"
+#pix_name: "train_03/pixnet_150.pth"
+#obs_name: "train_03/obsnet_150.pth"
+
+main_name: "train_04_00/model_150.pth"
+
+vqvae_name: "train_05/model_250.pth"
+pix_name: "train_05/pixnet_200.pth"
+obs_name: "train_05/obsnet_200.pth"
+
+batch_size: 1000
+
+defaults:
+    - _self_
+    - vqvae: cnn
+    - pixel: cnn
+
+optimizer:
+    maxiter: 50
+    v_des: 20
+
+env:
+    seed: 42
+    num_eps: 50
+    record: False
+    name: ""
+    render: False
+    plot: False
+
+hydra:
+    run:
+        dir: ./configs/hydra_logs

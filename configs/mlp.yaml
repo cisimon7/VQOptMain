@@ -1,0 +1,21 @@
+device: "cuda"
+train_log_dir: "./logs"
+
+vqvae_name: "train_04/model_100.pth"
+pix_name: "train_04/pixnet_150.pth"
+obs_name: "train_04/obsnet_150.pth"
+
+train_name: "train_03_01"
+
+num_epoch: 501
+batch_size: 5000
+learning_rate: 1e-3
+
+defaults:
+    - _self_
+    - vqvae: cnn
+    - pixel: cnn
+ 
+hydra:
+    run:
+        dir: ./configs/hydra_logs

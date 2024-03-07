@@ -1,0 +1,10 @@
+type: "linear"
+vqvae_model: "train_00/model_100.pth"
+num_epoch: 500
+batch_size: 20000
+learning_rate: 1e-3
+train_name: "train_00"
+cond_dim: 55
+n_channels: 32
+n_layers: 10
+obs_layers: [256, 1024, 1024]

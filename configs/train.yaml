@@ -1,0 +1,11 @@
+device: "cuda"
+train_log_dir: "./logs"
+
+defaults:
+    - _self_
+    - vqvae: cnn
+    - pixel: cnn
+ 
+hydra:
+    run:
+        dir: ./configs/hydra_logs

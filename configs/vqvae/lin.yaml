@@ -1,0 +1,16 @@
+type: "linear"
+num_epoch: 500
+batch_size: 5000
+learning_rate: 1e-3
+train_name: "train_00"
+input_dim: 200
+output_dim: 30
+latent_dim: 5
+num_embeddings: 128
+num_features: 10
+encoder_shape: [1024, 1024, 1024, 1024, 1024] 
+decoder_shape: [256, 1024, 1024, 1024, 1024]
+
+optimizer:
+    maxiter: 20
+    v_des: 26

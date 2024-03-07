@@ -1,0 +1,19 @@
+type: "cnn"
+vqvae_model: "train_05/model_250.pth"
+num_epoch: 501
+batch_size: 500
+learning_rate: 1e-3
+train_name: "train_05"
+cond_dim: 55
+n_channels: 64
+n_layers: 5
+
+obs_cnn:
+    hid_channels: 64
+    out_channels: 1
+    kernel_size: 11
+    padding: 5
+    num_layers: 10
+
+conv_padding: 3
+conv_kernel_size: 7
