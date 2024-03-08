@@ -23,7 +23,7 @@ device: "cuda"
 #pix_name: "train_03/pixnet_150.pth"
 #obs_name: "train_03/obsnet_150.pth"
 
-main_name: "train_04_01/model_100.pth"
+main_name: "train_04_01/model_150.pth"
 
 vqvae_name: "train_04/model_250.pth"
 pix_name: "train_04/pixnet_200.pth"
@@ -41,7 +41,7 @@ optimizer:
     v_des: 20
 
 env:
-    seed: 42
+    seed: 123
     num_eps: 50
     record: False
     name: ""

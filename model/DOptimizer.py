@@ -69,7 +69,6 @@ class DOptimizer(th.nn.Module):
         self.P, self.Pdot, self.Pddot = bernstein_coeff_order10_new(
             10, tot_time_copy[0], tot_time_copy[-1], tot_time_copy, device=self.device
         )
-
         self.nvar = self.P.size(dim=1)
 
         self.A_eq_x = th.vstack([self.P[0], self.Pdot[0], self.Pddot[0]])
@@ -138,7 +137,7 @@ class DOptimizer(th.nn.Module):
         # lower lane bound
         self.P_lb_1 = - self.P[1:self.num, :]
         self.P_lb_0 = self.P[0:self.num-1, :]
-        self.A_lb = self.P_lb_1 + (1-self.gamma) * self.P_lb_0
+        self.A_lb = self.P_lb_1 + (1 - self.gamma) * self.P_lb_0
 
         # vstack A_ub and A_lb
         self.A_lane_bound = th.vstack((self.A_ub, self.A_lb))
@@ -147,7 +146,7 @@ class DOptimizer(th.nn.Module):
         self.cost_smoothness = 1 * (self.Pddot.T @ self.Pddot)
 
         self.num_mean_update = 8
-        self.t_target = (self.num_mean_update-1)*self.t
+        self.t_target = (self.num_mean_update-1) * self.t
         
     def compute_boundary_vec(self, x_init, vx_init, ax_init, y_init, vy_init, ay_init):
         x_init_vec = x_init[:, None]
@@ -646,13 +645,13 @@ class DOptimizer(th.nn.Module):
         # vel = th.sqrt(xdot_ellites ** 2 + ydot_ellites ** 2)
         # vel_pen = th.linalg.norm(vel - self.v_des)
 
-        smoothness_pen = th.linalg.norm(yddot_ellites, dim=1) + th.linalg.norm(xddot_ellites, dim=1)
+        # smoothness_pen = th.linalg.norm(yddot_ellites, dim=1) + th.linalg.norm(xddot_ellites, dim=1)
             
         # cost_batch = 1*res_ellites + 1e-3*vel_pen\
         #          + 0.01*cost_steering + 0.01*cost_steering_vel + 0.01*heading_penalty
             
         cost_batch = 1*res_ellites + 1e-3*filter*vel_pen\
-                     + 0.01*cost_steering + 0.01*cost_steering_vel + 0.01*heading_penalty                  
+                     + 0.01*cost_steering + 0.01*cost_steering_vel + 0.01*heading_penalty
 
         return cost_batch, primal_sol_level_2[idx_ellites[0:self.ellite_num]]
     

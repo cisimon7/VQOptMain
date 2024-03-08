@@ -3,6 +3,8 @@ from typing import List
 from torch import Tensor
 from torchinfo import summary
 from model.DOptimizer import DOptimizer, InitializerModule
+from model.DOptimizerJax import DOptimizerJax
+from utils.torchModel2Jax import InitializerModuleJax
     
     
 class VectorQuantizerLayer(th.nn.Module):
@@ -48,6 +50,8 @@ class VQVAEModule(th.nn.Module):
             init_shape: List[int], beta=0.2, device="cpu", num_batch=1_000
     ):
         super(VQVAEModule, self).__init__()
+        self.num_batch = num_batch
+        self.mean, self.std, self.init_shape = mean, std, init_shape
         decoder_shapes = [num_features*embedding_dim] + decoder_shapes + [out_dim]
         
         self.quantizer = VectorQuantizerLayer(num_embeddings, embedding_dim, beta)
@@ -85,6 +89,17 @@ class VQVAEModule(th.nn.Module):
             self.dOptimizer(observations, p_lambda) if not inference else
             self.dOptimizer.inference(observations, p_lambda)
         )
+
+    def init_jax_functions(self):
+        init_model = self.dOptimizer.initializer_model
+        init_model_jax = InitializerModuleJax(self.mean, self.std, self.init_shape, init_model.cpu())
+        self.dOptimizerJax = DOptimizerJax(init_model_jax, self.num_batch)
+
+    def decode_jax(self, x, observations):
+        x = x.flatten(start_dim=-2)
+        p_lambda = self.decoder(x)
+
+        return self.dOptimizerJax.inference(observations, p_lambda.cpu().numpy())
 
     def forward(self, target, observations, inference=False):
         quantized_out, indices, quantizer_loss = self.encode(target)
@@ -127,11 +142,11 @@ class VQVAEModule(th.nn.Module):
         )
         pro_pen = th.nn.functional.mse_loss(primal_sol_level_2, primal_sol_level_1)
 
-        k = dict(res=1e0, vel=1e-3, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e-3, cen=1e-9)
-        # k = dict(res=1e0, vel=1e-1, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e0, cen=1e-9)
+        # k = dict(res=1e0, vel=1e-3, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e-3, cen=1e-9)
+        k = dict(res=1e0, vel=1e-1, hed=1e-1, cur=1e+1, smo=1e+0, pro=1e0, cen=1e-9)
         aug_loss = (
             + k["res"] * accumulated_res
-            + k["vel"] * vel_pen
+            # + k["vel"] * vel_pen
             + k["pro"] * pro_pen
             # + k["hed"] * heading_penalty
             # + k["cen"] * cen_closest

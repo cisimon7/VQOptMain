@@ -49,8 +49,8 @@ def get_vqvae(vqvae_cfg: DictConfig, mean, std, device="cpu") -> VQVAEModule:
         assert hasattr(vqvae.dOptimizer, key)
         setattr(vqvae.dOptimizer, key, value)
 
-    print("*****************************************************************************")
-    summary(vqvae, [(vqvae_cfg.batch_size, 200), (vqvae_cfg.batch_size, 55)], device=device, mode="train")
+    # print("*****************************************************************************")
+    # summary(vqvae, [(vqvae_cfg.batch_size, 200), (vqvae_cfg.batch_size, 55)], device=device, mode="train")
     return vqvae
 
 
@@ -80,21 +80,21 @@ def get_pix(vqvae_cfg: DictConfig, pix_cfg: DictConfig, mean, std, device="cpu")
             kernel_size=pix_cfg.obs_cnn.kernel_size, padding=pix_cfg.obs_cnn.padding,
             num_layers=pix_cfg.obs_cnn.num_layers, output_shape=vqvae_cfg.codebook.num_features, device=device,
         )
-        print("*****************************************************************************")
-        summary(obs_net, [(1, 55)], device=device)
+        # print("*****************************************************************************")
+        # summary(obs_net, [(1, 55)], device=device)
     elif pix_cfg.type == "linear":
         obs_net = PixObsNet(
             mean=mean, std=std, layers=pix_cfg.obs_layers, 
             input_shape=pix_cfg.cond_dim, output_shape=vqvae_cfg.codebook.num_features,
             device=device,
         )
-        print("*****************************************************************************")
-        summary(obs_net, [(1, 55)], device="cuda")
+        # print("*****************************************************************************")
+        # summary(obs_net, [(1, 55)], device="cuda")
 
     if pix_cfg.type == "cnn":
         pixel_cnn = get_pixcnn(vqvae_cfg, pix_cfg, device)
-        print("*****************************************************************************")
-        summary(pixel_cnn, [(1, 1, 7), (1, 1, 7)], device=device)
+        # print("*****************************************************************************")
+        # summary(pixel_cnn, [(1, 1, 7), (1, 1, 7)], device=device)
         return pixel_cnn, obs_net
     elif pix_cfg.type == "linear":
         return get_pixlin(vqvae_cfg, pix_cfg, device), obs_net

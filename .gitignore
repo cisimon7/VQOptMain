@@ -3,6 +3,7 @@
 .idea/
 .git/
 .venv/
+venv/
 *pycache*
 weights/
 videos/

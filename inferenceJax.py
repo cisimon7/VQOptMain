@@ -1,6 +1,7 @@
 import hydra
 from omegaconf import DictConfig
 
+import sys
 import gym
 import highway_env
 from gym.wrappers import RecordVideo
@@ -26,10 +27,9 @@ def main(cfg: DictConfig) -> None:
     cfg.pixel.batch_size = cfg.batch_size
     cfg.vqvae.optimizer = cfg.optimizer
     cfg.vqvae.batch_size = cfg.batch_size
-    _, _, mean, std = get_dataset(cfg.batch_size, test_ratio=0)
+    mean, std = 49.2430, 81.9682
     
     vqvae = get_vqvae(cfg.vqvae, mean, std, cfg.device)
-    # vqvae.load_state_dict(th.load(f"./weights/vqvae/{cfg.vqvae.type}/{cfg.vqvae_name}"))
     vqvae.load_state_dict(th.load(f"./weights/main/{cfg.vqvae.type}/{cfg.main_name}"))
     
     pix_net, obs_net = get_pix(cfg.vqvae, cfg.pixel, mean, std, cfg.device)
@@ -37,9 +37,8 @@ def main(cfg: DictConfig) -> None:
     obs_net.load_state_dict(th.load(f"./weights/pixel/{cfg.pixel.type}/{cfg.obs_name}"))
     
     vqvae.eval(), pix_net.eval(), obs_net.eval()
-    compiled_vqvae, compiled_pix_net, compiled_obs_net = (
-        th.compile(vqvae), th.compile(pix_net), th.compile(obs_net)
-    )
+    compiled_pix_net, compiled_obs_net = th.compile(pix_net), th.compile(obs_net)
+    vqvae.init_jax_functions()
     
     @th.compile
     def sample(observations):
@@ -80,12 +79,6 @@ def main(cfg: DictConfig) -> None:
     
     crash_count = 0
     all_vels = []
-    
-    print("v_des: ", cfg.optimizer.v_des)
-    print("vqvae_name: ", cfg.main_name)
-    print("pixel_name: ", cfg.pix_name)
-    print("maxiter: ", vqvae.dOptimizer.maxiter)
-    print("batch_size: ", vqvae.dOptimizer.num_batch)
 
     with th.no_grad():
         for i in range(cfg.env.num_eps):
@@ -99,11 +92,11 @@ def main(cfg: DictConfig) -> None:
                 
                 observation = th.from_numpy(obs).unsqueeze(dim=0).to(device=cfg.device, dtype=th.float32)
                 latent = sample(observation)
-                latent = compiled_vqvae.quantizer.embedding(latent.to(dtype=th.int32))
-                control, all_trajs, opt_traj = compiled_vqvae.decode(
-                    latent, observation.repeat(cfg.batch_size, 1)
+                latent = vqvae.quantizer.embedding(latent.to(dtype=th.int32))
+                control, all_trajs, opt_traj = vqvae.decode_jax(
+                    latent, observation.repeat(cfg.batch_size, 1).cpu().numpy()
                 )
-                obs, reward, done, info = env.step(control.cpu().tolist())
+                obs, reward, done, info = env.step(control)
                 
                 if render:
                     env.render()
@@ -127,14 +120,6 @@ def main(cfg: DictConfig) -> None:
                 duration=duration, collision_rate=100*crash_count/(i+1)
             )
     
-    print("")
-    print("v_des: ", cfg.optimizer.v_des)
-    print("vqvae_name: ", cfg.main_name)
-    print("pixel_name: ", cfg.pix_name)
-    print("maxiter: ", vqvae.dOptimizer.maxiter)
-    print("batch_size: ", vqvae.dOptimizer.num_batch)
-    print("")
-    
     print_config_details(
         config, (100*crash_count/(i+1)), 
         np.mean(all_vels).round(2), np.std(all_vels).round(2),
@@ -144,4 +129,3 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     main()
-    
