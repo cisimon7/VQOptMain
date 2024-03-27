@@ -4,14 +4,14 @@ This repository contains the source code to reproduce the experiments in our IRO
 <!-- ![vq_img](/gif/vqp.png)
 ![mlp_img](/gif/mlp.png) -->
 
-<img src="./gif/vqp.png" width="128"/>
-<img src="./gif/mlp.png" width="128"/>
+<img src="./gifs/vqp.png" width="128"/>
+<img src="./gifs/mlp.png" width="128"/>
 
 
 Refer to [this repo](https://github.com/jatan12/DiffProj/) for the CVAE baseline used in our comparison.
 
 <!-- ![comparison_img](/gif/comp.png) -->
-<img src="./gif/comp.png" width="128"/>
+<img src="./gifs/comp.png" width="128"/>
 
 ## Getting Started
 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ## Reproducing our main experimental results
 
 <!-- ![Benchmarks](/gif/scenarios.png) -->
-<img src="./gif/scenarios.png" width="128"/>
+<img src="./gifs/scenarios.png" width="128"/>
 
 #### Running Experiment
 
