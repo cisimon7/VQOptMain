@@ -4,8 +4,8 @@ This repository contains the source code to reproduce the experiments in our IRO
 <!-- ![vq_img](/gif/vqp.png)
 ![mlp_img](/gif/mlp.png) -->
 
-<img src="./gifs/vqp.png" width="640"/>
-<img src="./gifs/mlp.png" width="384"/>
+<img src="./gifs/vqp.png" width="800"/>
+<!-- <img src="./gifs/mlp.png" width="384"/> -->
 
 
 Refer to [this repo](https://github.com/jatan12/DiffProj/) for the CVAE baseline used in our comparison.
@@ -47,7 +47,9 @@ Using the main.yaml file, you can configure the environment and optimizer parame
 ## Comparison using the simulator
 
 #### VQVAE
-![vq_gif](/gifs/vq.gif)
+<!-- ![vq_gif](/gifs/vq.gif) -->
+<img src="./gifs/vq.gif" width="800"/>
 
 #### CVAE
-![cv_gif](/gifs/cv.gif)
+<!-- ![cv_gif](/gifs/cv.gif) -->
+<img src="./gifs/cv.gif" width="800"/>
