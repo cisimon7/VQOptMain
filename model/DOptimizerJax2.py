@@ -106,7 +106,7 @@ class DOptimizerJax:
         self.key = random.PRNGKey(0)
 
         self.gamma = 0.9
-        self.gamma_obs = 0.90
+        self.gamma_obs = 0.98
         self.gamma_obs_long = 0.9
 
         # upper lane bound
@@ -334,7 +334,7 @@ class DOptimizerJax:
     @partial(jit, static_argnums=(0,))
     def compute_alph_d(
         self, primal_sol_level_2, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub,
-        lamda_x, lamda_y
+        lamda_x, lamda_y, d_obs_prev
     ):
 
         primal_sol_x = primal_sol_level_2[:, 0:self.nvar]
@@ -363,8 +363,13 @@ class DOptimizerJax:
         c2_d = 1.0 * self.rho_obs * (self.a_obs*wc_alpha * jnp.cos(alpha_obs) + self.b_obs*ws_alpha * jnp.sin(alpha_obs) )
 
         d_temp = c2_d/c1_d
+        # d_obs = jnp.maximum(
+        #     jnp.ones((self.num_batch, self.num * self.num_obs * self.num_circles)),
+        #     d_temp
+        # )
+        d_obs_prev = self.comp_d_obs_prev(d_obs_prev)
         d_obs = jnp.maximum(
-            jnp.ones((self.num_batch, self.num * self.num_obs * self.num_circles)),
+            jnp.ones((self.num_batch, self.num * self.num_obs * self.num_circles)) + (1 - self.gamma_obs) * (d_obs_prev - 1),
             d_temp
         )
 
@@ -447,7 +452,7 @@ class DOptimizerJax:
 
         primal_sol_level_1 = self.qp_layer_1(initial_state.T, neural_output_batch, cost_mat_inv_x, cost_mat_inv_y)
 
-        # d_obs1 = jnp.ones((self.num_batch, self.num*self.num_obs*self.num_circles))
+        d_obs = jnp.ones((self.num_batch, self.num*self.num_obs*self.num_circles))
 
         initializer_output = self.initializer_model(primal_sol_level_1, observations)
         primal_sol_level_bar = initializer_output[..., :22]
@@ -457,7 +462,7 @@ class DOptimizerJax:
 
         alpha_obs, d_obs, alpha_a, d_a, lamda_x, lamda_y, alpha_v, d_v, s_lane, res_norm_batch = self.compute_alph_d(
             primal_sol_level_bar, x_obs_traj, y_obs_traj,
-            y_lane_lb, y_lane_ub, lamda_x, lamda_y
+            y_lane_lb, y_lane_ub, lamda_x, lamda_y, d_obs
         )
 
         carry_init = (
@@ -475,7 +480,7 @@ class DOptimizerJax:
                     alpha_v, d_v, s_lane, res_norm_batch
              ) = self.compute_alph_d(
                 primal_sol_level_2, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub,
-                lamda_x, lamda_y
+                lamda_x, lamda_y, d_obs
              )
             accumulated_res += res_norm_batch
 

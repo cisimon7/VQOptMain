@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import torch as th
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 
@@ -43,6 +45,38 @@ def view_train(
     plt.close()
     
 
+class PlotNeural:
+    def __init__(self, figsize=(6, 6)):
+        self.world_min_x, self.world_max_x = -5, 50
+
+        plt.ion()
+        self.fig, self.ax = plt.subplots(figsize=figsize)
+
+    def step(self, neural_output):
+        vb, yb = neural_output[..., :4], neural_output[..., 4:8]
+        self.ax.clear()
+
+        dfs = []
+        x_name = r'$v_{d}$  [m/s]'
+        y_name = r'$y_{d}$ [m]'
+        for i in range(4):
+            df = pd.DataFrame({x_name: vb[:, i], y_name: yb[:, i]})
+            df['name'] = f"P_{i}"
+            dfs.append(df)
+
+        data = pd.concat(dfs)
+        sns.kdeplot(data, x=x_name, y=y_name, hue='name', fill=True, ax=self.ax)
+
+        self.ax.set_xlim([0, 30])
+        self.ax.set_ylim([-16, 16])
+        
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+
+    def close(self):
+        plt.close()   
+
+        
 class PlotEnv:
     WIDTH, HEIGHT = 4, 1.3
     LANE_WIDTH = 4

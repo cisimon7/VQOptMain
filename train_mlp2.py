@@ -14,6 +14,32 @@ from commons import get_vqvae, make_dir, seed_mch
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 
 
+class InitializerModule2(th.nn.Module):
+    def __init__(self, mean, std, in_dim, out_dim, mlp_shape):
+        super(InitializerModule2, self).__init__()
+        self.mean = mean
+        self.std = std
+        shapes = [in_dim] + mlp_shape + [out_dim+1]
+        self.net = th.nn.Sequential(
+        *[
+            th.nn.Sequential(
+                th.nn.Linear(in_fea, out_fea),
+                th.nn.BatchNorm1d(out_fea),
+                th.nn.ReLU()
+            )
+            for i, (in_fea, out_fea) in enumerate(th.tensor(shapes).unfold(0, 2, 1))
+        ] + [
+            th.nn.Linear(shapes[-1], shapes[-1])
+        ])
+            
+    def forward(self, primal_sol_1, observations):
+        observations = (observations - self.mean) / self.std
+        x = th.cat([primal_sol_1, observations], dim=-1)           
+        out = self.net(x)
+        out[..., -1] = th.nn.functional.sigmoid(out[..., -1])
+        return out
+
+
 class TriDataset(Dataset):
     def __init__(self, obs, traj, primal):
         self.inp, self.out, self.primal = obs, primal, traj
@@ -45,6 +71,13 @@ def main(cfg: DictConfig) -> None:
     cfg.vqvae.batch_size = cfg.batch_size
     vqvae = get_vqvae(cfg.vqvae, mean, std, cfg.device)
     vqvae.load_state_dict(th.load(f"./weights/vqvae/{cfg.vqvae.type}/{cfg.vqvae_name}"))
+    vqvae.dOptimizer.initializer_model = InitializerModule2(
+        mean, std, 
+        cfg.vqvae.initializer.input_dim,
+        cfg.vqvae.initializer.output_dim,
+        cfg.vqvae.initializer.shape
+    )
+    vqvae.dOptimizer.initializer_model.to(cfg.device)
     
     for param in vqvae.encoder.parameters():
         param.requires_grad = False
@@ -103,7 +136,7 @@ def main(cfg: DictConfig) -> None:
             save_path=f"{train_imgs_path}/{epoch:03d}.png"
         )
         
-        if epoch % 50 == 0:
+        if epoch % 20 == 0:
             th.save(vqvae.state_dict(), f"{model_save_path}/model_{epoch:02d}.pth")
             
   

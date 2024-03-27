@@ -1,33 +1,17 @@
 device: "cuda"
 
-#main_name: "train_00_20/model_150.pth"
-#main_name: "train_00_21/model_100.pth"
-#main_name: "train_00_22/model_100.pth"
-#main_name: "train_00_23/model_100.pth"
-#main_name: "train_00_24/model_100.pth"
-#main_name: "train_00_26/model_100.pth"
 
-#vqvae_name: "train_00/model_100.pth"
-#pix_name: "train_00/pixnet_150.pth"
-#obs_name: "train_00/obsnet_150.pth"
+main_name: "train_00_20/model_150.pth"
 
-#main_name: "train_02_00/model_150.pth"
-#
-#vqvae_name: "train_02/model_150.pth"
-#pix_name: "train_02/pixnet_250.pth"
-#obs_name: "train_02/obsnet_250.pth"
+vqvae_name: "train_00/model_100.pth"
+pix_name: "train_00/pixnet_150.pth"
+obs_name: "train_00/obsnet_150.pth"
 
-#main_name: "train_03_01/model_100.pth"
+# main_name: "train_00_bar_04/model_60.pth"
 
-#vqvae_name: "train_03/model_100.pth"
-#pix_name: "train_03/pixnet_150.pth"
-#obs_name: "train_03/obsnet_150.pth"
-
-main_name: "train_04_01/model_150.pth"
-
-vqvae_name: "train_04/model_250.pth"
-pix_name: "train_04/pixnet_200.pth"
-obs_name: "train_04/obsnet_200.pth"
+# vqvae_name: "train_00_bar/model_150.pth"
+# pix_name: "train_00_bar/pixnet_300.pth"
+# obs_name: "train_00_bar/obsnet_300.pth"
 
 batch_size: 1000
 
@@ -37,16 +21,18 @@ defaults:
     - pixel: cnn
 
 optimizer:
-    maxiter: 10
+    maxiter: 100
     v_des: 20
 
 env:
     seed: 123
     num_eps: 50
+    density: 3.0
+    speed_limit: 15
     record: False
     name: ""
     render: True
-    plot: False
+    plot: False  # Visualization of trajectories, slows down simulation and only works when inferencing with Pytorch
 
 hydra:
     run:

@@ -33,6 +33,7 @@ def main(cfg: DictConfig) -> None:
     obs_net.load_state_dict(th.load(f"./weights/pixel/{cfg.pixel.type}/{cfg.obs_name}"))
     
     vqvae.eval(), pix_net.eval(), obs_net.eval()
+    vqvae.dOptimizer.qp1_train = True
     compiled_vqvae, compiled_pix_net, compiled_obs_net = (
         th.compile(vqvae), th.compile(pix_net), th.compile(obs_net)
     )

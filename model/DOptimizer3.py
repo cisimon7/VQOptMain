@@ -349,7 +349,7 @@ class DOptimizer(th.nn.Module):
 
     def compute_alph_d(
             self, primal_sol_level_2, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub,
-            lamda_x, lamda_y
+            lamda_x, lamda_y, d_obs_prev, gamma_obs
     ):
 
         primal_sol_x = primal_sol_level_2[:, 0:self.nvar]
@@ -378,10 +378,15 @@ class DOptimizer(th.nn.Module):
         c2_d = 1.0 * self.rho_obs * (self.a_obs*wc_alpha * th.cos(alpha_obs) + self.b_obs*ws_alpha * th.sin(alpha_obs) )
 
         d_temp = c2_d/c1_d
+        # d_obs = th.maximum(
+        #     th.ones((self.num_batch, self.num * self.num_obs * self.num_circles), device=self.device),
+        #     d_temp
+        # )
+        d_obs_prev = self.comp_d_obs_prev(d_obs_prev)
         d_obs = th.maximum(
-            th.ones((self.num_batch, self.num * self.num_obs * self.num_circles), device=self.device),
+            th.ones((self.num_batch, self.num * self.num_obs * self.num_circles), device=self.device) + (1 - gamma_obs)*(d_obs_prev - 1),
             d_temp
-        )
+        )    
 
         wc_alpha_vx = xdot
         ws_alpha_vy = ydot
@@ -433,10 +438,19 @@ class DOptimizer(th.nn.Module):
         res_lane_vec = th.mm(self.A_lane_bound, primal_sol_y.T).T - b_lane_bound + s_lane
         # res_long_vec = th.mm(self.A_barrier_long, primal_sol_x.T).T - b_long_bound + s_long
 
-        res_norm_batch = th.linalg.norm(res_obs_vec, dim=1) \
+        obs_constraint = -(wc_alpha/self.a_obs)**2-(ws_alpha/self.a_obs)**2+th.ones(( self.num_batch, self.num  * self.num_obs * self.num_circles), device = self.device)
+        obs_penalty = th.linalg.norm(th.maximum( th.ones(( self.num_batch, self.num * self.num_obs * self.num_circles  ), device=self.device), obs_constraint   ), dim = 1)
+
+        # res_norm_batch = th.linalg.norm(res_obs_vec, dim=1) \
+        #                  + th.linalg.norm(res_acc_vec, dim=1) \
+        #                  + th.linalg.norm(res_vel_vec, dim=1) \
+        #                  + th.linalg.norm(res_lane_vec, dim=1)
+        
+        res_norm_batch = obs_penalty \
                          + th.linalg.norm(res_acc_vec, dim=1) \
                          + th.linalg.norm(res_vel_vec, dim=1) \
                          + th.linalg.norm(res_lane_vec, dim=1)
+        
 
         lamda_x = lamda_x - self.rho_ineq * th.mm(self.A_acc.T, res_ax_vec.T).T \
                   - self.rho_ineq * th.mm(self.A_vel.T, res_vx_vec.T).T \
@@ -459,14 +473,15 @@ class DOptimizer(th.nn.Module):
         cost_mat_inv_x_layer_2, cost_mat_inv_y_layer_2 = self.compute_mat_inv_layer_2
         
         initializer_output = self.initializer_model(primal_sol_level_1, observations)
-        primal_sol_level_bar, lamda_x, lamda_y = initializer_output.split([2*self.nvar, self.nvar, self.nvar], -1)
-        primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
+        primal_sol_level_bar, lamda_x, lamda_y, gamma_obs = initializer_output.split([2*self.nvar, self.nvar, self.nvar, 1], -1)
+        # primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
 
+        d_obs = th.ones((self.num_batch, self.num*self.num_obs*self.num_circles), device=self.device)
         (alpha_obs, d_obs, alpha_a, d_a,
             lamda_x, lamda_y, alpha_v, d_v,
             s_lane, res_norm_batch
         ) = self.compute_alph_d(
-             primal_sol_level_bar, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub, lamda_x, lamda_y
+             primal_sol_level_bar, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub, lamda_x, lamda_y, d_obs, gamma_obs
         )
         
         accumulated_res = 0
@@ -480,7 +495,7 @@ class DOptimizer(th.nn.Module):
                 alpha_v, d_v, s_lane, res_norm_batch
             ) = self.compute_alph_d(
                 primal_sol_level_2, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub,
-                lamda_x, lamda_y, d_obs
+                lamda_x, lamda_y, d_obs, gamma_obs
             )
             accumulated_res += res_norm_batch
         
@@ -504,14 +519,15 @@ class DOptimizer(th.nn.Module):
             return primal_sol_level_1, primal_sol_level_1, 0, 0
 
         initializer_output = self.initializer_model(primal_sol_level_1, observations)
-        primal_sol_level_bar, lamda_x, lamda_y = initializer_output.split([2*self.nvar, self.nvar, self.nvar], -1)
-        primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
+        primal_sol_level_bar, lamda_x, lamda_y, gamma_obs = initializer_output.split([2*self.nvar, self.nvar, self.nvar, 1], -1)
+        # primal_sol_level_bar = primal_sol_level_1 + primal_sol_level_bar
 
+        d_obs = th.ones((self.num_batch, self.num*self.num_obs*self.num_circles), device=self.device)
         (alpha_obs, d_obs, alpha_a, d_a,
                 lamda_x, lamda_y, alpha_v, d_v,
                 s_lane, res_norm_batch
          ) = self.compute_alph_d(
-                 primal_sol_level_bar, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub, lamda_x, lamda_y
+                 primal_sol_level_bar, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub, lamda_x, lamda_y, d_obs, gamma_obs
          )
 
         accumulated_res = 0
@@ -525,7 +541,7 @@ class DOptimizer(th.nn.Module):
                     alpha_v, d_v, s_lane, res_norm_batch
              ) = self.compute_alph_d(
                  primal_sol_level_2, x_obs_traj, y_obs_traj, y_lane_lb, y_lane_ub,
-                 lamda_x, lamda_y
+                 lamda_x, lamda_y, d_obs, gamma_obs
              )
             accumulated_res += res_norm_batch
 

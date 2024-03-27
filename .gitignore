@@ -17,3 +17,6 @@ bests/
 outputs/*
 benchmarks.yaml
 benchmark/
+benchmarks/
+results/*
+inference_cpu.py

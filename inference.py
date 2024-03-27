@@ -56,6 +56,8 @@ def main(cfg: DictConfig) -> None:
         
         return latent_sample.squeeze(dim=-2)
 
+    config["vehicles_density"] = cfg.env.density
+    config["speed_limit"] = cfg.env.speed_limit
     env = gym.make("highway-v0", config=config)
     env.seed(cfg.env.seed)
     render = cfg.env.render

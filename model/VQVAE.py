@@ -2,7 +2,8 @@ import torch as th
 from typing import List
 from torch import Tensor
 from torchinfo import summary
-from model.DOptimizer import DOptimizer, InitializerModule
+from time import time
+from model.DOptimizer2 import DOptimizer, InitializerModule
 from model.DOptimizerJax import DOptimizerJax
 from utils.torchModel2Jax import InitializerModuleJax
     
@@ -83,23 +84,30 @@ class VQVAEModule(th.nn.Module):
     
     def decode(self, x: Tensor, observations, inference=True):
         x = x.flatten(start_dim=-2)
+
+        # start = time()
         p_lambda = self.decoder(x)
+        # print(f"duration: {time() - start}")
         
         return (
             self.dOptimizer(observations, p_lambda) if not inference else
             self.dOptimizer.inference(observations, p_lambda)
         )
 
-    def init_jax_functions(self):
+    def init_jax_functions(self, vqvae_cfg):
         init_model = self.dOptimizer.initializer_model
         init_model_jax = InitializerModuleJax(self.mean, self.std, self.init_shape, init_model.cpu())
         self.dOptimizerJax = DOptimizerJax(init_model_jax, self.num_batch)
+
+        for key, value in vqvae_cfg.optimizer.items():
+            assert hasattr(self.dOptimizerJax, key)
+            setattr(self.dOptimizerJax, key, value)
 
     def decode_jax(self, x, observations):
         x = x.flatten(start_dim=-2)
         p_lambda = self.decoder(x)
 
-        return self.dOptimizerJax.inference(observations, p_lambda.cpu().numpy())
+        return p_lambda.cpu().numpy(), self.dOptimizerJax.inference(observations, p_lambda.cpu().numpy())
 
     def forward(self, target, observations, inference=False):
         quantized_out, indices, quantizer_loss = self.encode(target)

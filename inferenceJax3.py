@@ -1,7 +1,6 @@
 import hydra
 from omegaconf import DictConfig
 
-import time
 import sys
 import gym
 import highway_env
@@ -13,9 +12,9 @@ from time import perf_counter
 from tqdm import tqdm
 import numpy as np
 import torch as th
+from utils.visualizations import PlotEnv
 from datasets.datasets2 import get_dataset
 from commons import get_vqvae, get_pix, seed_mch
-from utils.visualizations import PlotEnv, PlotNeural
 from utils.config import config, print_config_details, print_eps_details
 
 import warnings
@@ -23,6 +22,32 @@ warnings.filterwarnings("ignore", message="Lazy modules are a new feature under 
 
 import logging
 logging.getLogger("jax").setLevel(logging.WARNING)
+
+
+class InitializerModule2(th.nn.Module):
+    def __init__(self, mean, std, in_dim, out_dim, mlp_shape):
+        super(InitializerModule2, self).__init__()
+        self.mean = mean
+        self.std = std
+        shapes = [in_dim] + mlp_shape + [out_dim+1]
+        self.net = th.nn.Sequential(
+        *[
+            th.nn.Sequential(
+                th.nn.Linear(in_fea, out_fea),
+                th.nn.BatchNorm1d(out_fea),
+                th.nn.ReLU()
+            )
+            for i, (in_fea, out_fea) in enumerate(th.tensor(shapes).unfold(0, 2, 1))
+        ] + [
+            th.nn.Linear(shapes[-1], shapes[-1])
+        ])
+            
+    def forward(self, primal_sol_1, observations):
+        observations = (observations - self.mean) / self.std
+        x = th.cat([primal_sol_1, observations], dim=-1)           
+        out = self.net(x)
+        out[..., -1] = th.nn.functional.sigmoid(out[..., -1])
+        return out
 
 
 @hydra.main(version_base=None, config_path="./configs", config_name="main")
@@ -35,6 +60,13 @@ def main(cfg: DictConfig) -> None:
     mean, std = 49.2430, 81.9682
     
     vqvae = get_vqvae(cfg.vqvae, mean, std, cfg.device)
+    vqvae.dOptimizer.initializer_model = InitializerModule2(
+        mean, std, 
+        cfg.vqvae.initializer.input_dim,
+        cfg.vqvae.initializer.output_dim,
+        cfg.vqvae.initializer.shape
+    )
+    vqvae.dOptimizer.initializer_model.to(cfg.device)
     vqvae.load_state_dict(th.load(f"./weights/main/{cfg.vqvae.type}/{cfg.main_name}"))
     
     pix_net, obs_net = get_pix(cfg.vqvae, cfg.pixel, mean, std, cfg.device)
@@ -86,7 +118,7 @@ def main(cfg: DictConfig) -> None:
             np.stack([obs[5::5], obs[6::5], obs[9::5]], axis=-1), 
             batch_size=cfg.batch_size
         )
-        plot_neu = PlotNeural()
+    
 
     with th.no_grad():
         for i in range(cfg.env.num_eps):
@@ -98,16 +130,12 @@ def main(cfg: DictConfig) -> None:
                 speed = np.linalg.norm(obs[2:4])
                 vels.append(speed)
                 
-                # start = time.time()
                 observation = th.from_numpy(obs).unsqueeze(dim=0).to(device=cfg.device, dtype=th.float32)
                 latent = sample(observation)
                 latent = vqvae.quantizer.embedding(latent.to(dtype=th.int32))
-                neural_output, (control, all_trajs, opt_traj, idx)  = vqvae.decode_jax(
+                control, all_trajs, opt_traj = vqvae.decode_jax(
                     latent, observation.repeat(cfg.batch_size, 1).cpu().numpy()
                 )
-                # end = time.time()
-                # print("Time elapsed:", end - start)
-
                 obs, reward, done, info = env.step(control)
                 
                 if render:
@@ -117,9 +145,8 @@ def main(cfg: DictConfig) -> None:
                     plot_env.step(
                         np.hstack([obs[0], obs[1], obs[4]]),
                         np.stack([obs[5::5], obs[6::5], obs[9::5]], axis=-1),
-                        np.asarray(obs[:2]), np.asarray(all_trajs[idx[0:1000]]), None, np.asarray(opt_traj)
+                        np.asarray(obs[:2]), np.asarray(all_trajs), None, np.asarray(opt_traj)
                     )
-                    plot_neu.step(neural_output)
                     
             duration = perf_counter() - start_time
                 

@@ -2,7 +2,7 @@ type: "cnn"
 num_epoch: 501
 batch_size: 5000
 learning_rate: 1e-3
-train_name: "train_05"
+train_name: "train_00_bar"
 warm_star: "" 
 
 encoder:
@@ -15,7 +15,7 @@ encoder:
 
 codebook:
     latent_dim: 5
-    num_embeddings: 16  # 16, 512
+    num_embeddings: 16 
     num_features: 10
 
 decoder:
@@ -27,5 +27,5 @@ initializer:
     shape: [256, 1024, 1024, 1024]
 
 optimizer:
-    maxiter: 10
+    maxiter: 5
     v_des: 20
