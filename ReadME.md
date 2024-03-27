@@ -4,14 +4,14 @@ This repository contains the source code to reproduce the experiments in our IRO
 <!-- ![vq_img](/gif/vqp.png)
 ![mlp_img](/gif/mlp.png) -->
 
-<img src="./gifs/vqp.png" width="128"/>
-<img src="./gifs/mlp.png" width="128"/>
+<img src="./gifs/vqp.png" width="640"/>
+<img src="./gifs/mlp.png" width="384"/>
 
 
 Refer to [this repo](https://github.com/jatan12/DiffProj/) for the CVAE baseline used in our comparison.
 
 <!-- ![comparison_img](/gif/comp.png) -->
-<img src="./gifs/comp.png" width="128"/>
+<img src="./gifs/comp.png" width="800"/>
 
 ## Getting Started
 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ## Reproducing our main experimental results
 
 <!-- ![Benchmarks](/gif/scenarios.png) -->
-<img src="./gifs/scenarios.png" width="128"/>
+<img src="./gifs/scenarios.png" width="800"/>
 
 #### Running Experiment
 
@@ -42,3 +42,12 @@ Using the main.yaml file, you can configure the environment and optimizer parame
 ```
 !python3 inferenceJax.py 'env={seed: 42, speed_limit: 15, num_eps: 50, render: False, plot: False}' 'optimizer={maxiter: 100, v_des: 20}' 'batch_size=1000'
 ```
+
+
+## Comparison using the simulator
+
+#### VQVAE
+![vq_gif](/gifs/vq.gif)
+
+#### CVAE
+![cv_gif](/gifs/cv.gif)
