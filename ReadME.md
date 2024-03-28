@@ -24,8 +24,8 @@ cd VQOptMain
 2. Create a conda environment and install the dependencies:
 
 ```
-conda create -n diffproj python=3.8
-conda activate diffproj
+conda create -n venv python=3.8
+conda activate venv
 pip install -r requirements.txt
 ```
 

@@ -85,9 +85,9 @@ class VQVAEModule(th.nn.Module):
     def decode(self, x: Tensor, observations, inference=True):
         x = x.flatten(start_dim=-2)
 
-        # start = time()
+        start = time()
         p_lambda = self.decoder(x)
-        # print(f"duration: {time() - start}")
+        print(f"duration: {time() - start}")
         
         return (
             self.dOptimizer(observations, p_lambda) if not inference else
