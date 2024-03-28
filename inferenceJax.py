@@ -98,15 +98,15 @@ def main(cfg: DictConfig) -> None:
                 speed = np.linalg.norm(obs[2:4])
                 vels.append(speed)
                 
-                start = time.time()
+                # start = time.time()
                 observation = th.from_numpy(obs).unsqueeze(dim=0).to(device=cfg.device, dtype=th.float32)
                 latent = sample(observation)
                 latent = vqvae.quantizer.embedding(latent.to(dtype=th.int32))
                 neural_output, (control, all_trajs, opt_traj, idx)  = vqvae.decode_jax(
                     latent, observation.repeat(cfg.batch_size, 1).cpu().numpy()
                 )
-                end = time.time()
-                print("Time elapsed:", end - start)
+                # end = time.time()
+                # print("Time elapsed:", end - start)
 
                 obs, reward, done, info = env.step(control)
                 
