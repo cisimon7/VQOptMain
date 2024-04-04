@@ -1,5 +1,5 @@
 ### Learning Sampling Distribution and Safety Filter for Autonomous Driving with VQ-VAE and Differentiable Optimization
-This repository contains the source code to reproduce the experiments in our IROS 2024 paper where we compare CVAE based model to VQVAE based model for trajectory planning.
+This repository contains the source code to reproduce the experiments in our [IROS 2024 paper](https://arxiv.org/abs/2403.19461) where we compare CVAE based model to VQVAE based model for trajectory planning.
 
 <!-- ![vq_img](/gif/vqp.png)
 ![mlp_img](/gif/mlp.png) -->
@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 3. Download [Trained Models](https://owncloud.ut.ee/owncloud/s/bBb4dSxHdNd2m3C) and save to directory named `weights`
 
-4. Download the [training dataset](https://owncloud.ut.ee/owncloud/s/YgdSoGHgX7maSPc) and extract the files to the dataset directory. 
+4. Download the [training dataset](https://owncloud.ut.ee/owncloud/s/YgdSoGHgX7maSPc) and extract the files to the dataset directory, if you want to retrain.
 
 ## Reproducing our main experimental results
 
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 Using the main.yaml file, you can configure the environment and optimizer parameters or you can run with the command line args as below:
 ```
-!python3 inferenceJax.py 'env={seed: 42, speed_limit: 15, num_eps: 50, render: False, plot: False}' 'optimizer={maxiter: 100, v_des: 20}' 'batch_size=1000'
+python3 inferenceJax.py 'env={seed: 42, speed_limit: 15, num_eps: 50, render: False, plot: False}' 'optimizer={maxiter: 100, v_des: 20}' 'batch_size=1000'
 ```
 
 
