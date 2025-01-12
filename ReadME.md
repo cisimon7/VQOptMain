@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 3. Download [Trained Models](https://owncloud.ut.ee/owncloud/s/bBb4dSxHdNd2m3C) and save to directory named `weights`
 
-4. Download the [training dataset](https://owncloud.ut.ee/owncloud/s/YgdSoGHgX7maSPc) and extract the files to the dataset directory, if you want to retrain.
+4. Download the [training dataset](https://owncloud.ut.ee/owncloud/s/mywRo9tZxHR5WRZ) and extract the files to the dataset directory, if you want to retrain.
 
 ## Reproducing our main experimental results
 
